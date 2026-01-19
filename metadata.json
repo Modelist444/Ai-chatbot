@@ -1,6 +1,6 @@
 {
   "name": "EthosShield",
-  "description": "A Web3 Risk Explanation Chatbot that interprets blockchain transaction scans into human-readable, actionable security guidance.",
+  "description": "Cyber-defense grade Web3 risk explanation platform powered by Ethos Network reputation data.",
   "requestFramePermissions": [
     "microphone"
   ]

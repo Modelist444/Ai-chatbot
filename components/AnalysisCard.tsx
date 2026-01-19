@@ -1,7 +1,7 @@
+
 import React, { useState } from 'react';
 import { RiskAnalysisResponse, Recommendation, RiskLevel } from '../types';
-import { RiskBadge } from './RiskBadge';
-import { AlertTriangle, ShieldCheck, Info, BookOpen, Volume2, Loader2, Copy, Check, Hash, MessageSquare, Twitter, Activity, FileJson, Users, ShieldAlert, Zap } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, Info, BookOpen, Volume2, Loader2, Copy, Check, Users, ShieldAlert, Zap, Box, ArrowRight, TrendingUp, Search } from 'lucide-react';
 import { generateSpeech } from '../geminiService';
 import { playPCM } from '../audioUtils';
 
@@ -19,18 +19,16 @@ export const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis, ethosScore
     setIsSpeaking(true);
     try {
       const audioData = await generateSpeech(analysis.tts_text);
-      if (audioData) {
-        await playPCM(audioData);
-      }
+      if (audioData) await playPCM(audioData);
     } catch (error) {
-      console.error("Failed to play audio", error);
+      console.error(error);
     } finally {
       setIsSpeaking(false);
     }
   };
 
   const handleCopy = () => {
-    const reportText = `🛡️ EthosShield Report\nLevel: ${analysis.risk_level || 'UNKNOWN'}\nReputation: ${ethosScore || 'N/A'}\nSummary: ${analysis.summary}\nGuidance: ${analysis.recommendation}`;
+    const reportText = `[ETHOS SHIELD REPORT]\nSTATUS: ${analysis.risk_level}\nRECOMMENDATION: ${analysis.recommendation}\nETHOS SCORE: ${ethosScore || 'N/A'}\n${analysis.summary}`;
     navigator.clipboard.writeText(reportText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -39,17 +37,9 @@ export const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis, ethosScore
 
   const getRecIcon = () => {
     switch (analysis.recommendation) {
-      case Recommendation.SAFE_TO_PROCEED: return <ShieldCheck className="w-5 h-5 text-emerald-400" />;
-      case Recommendation.DO_NOT_PROCEED: return <AlertTriangle className="w-5 h-5 text-rose-400" />;
-      default: return <Info className="w-5 h-5 text-amber-400" />;
-    }
-  };
-
-  const getRecStyles = () => {
-    switch (analysis.recommendation) {
-      case Recommendation.SAFE_TO_PROCEED: return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-100 shadow-[0_0_15px_rgba(16,185,129,0.1)]';
-      case Recommendation.DO_NOT_PROCEED: return 'bg-rose-500/10 border-rose-500/20 text-rose-100 shadow-[0_0_15px_rgba(244,63,94,0.1)]';
-      default: return 'bg-amber-500/10 border-amber-500/20 text-amber-100 shadow-[0_0_15px_rgba(245,158,11,0.1)]';
+      case Recommendation.SAFE_TO_PROCEED: return <ShieldCheck className="w-8 h-8 text-emerald-400" />;
+      case Recommendation.DO_NOT_PROCEED: return <AlertTriangle className="w-8 h-8 text-rose-400" />;
+      default: return <Info className="w-8 h-8 text-amber-400" />;
     }
   };
 
@@ -59,186 +49,176 @@ export const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis, ethosScore
     return 'text-rose-400';
   };
 
-  const getEthosBg = (score: number) => {
-    if (score > 650) return 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)]';
-    if (score > 350) return 'bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]';
-    return 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.5)]';
+  const getEthosTier = (score: number) => {
+    if (score > 650) return 'High Social Trust Tier';
+    if (score > 350) return 'Neutral Credibility Tier';
+    return 'Low Trust / Anonymized Tier';
   };
 
   const metadata = analysis.enhanced_metadata;
-  const isTemplate = analysis.education?.includes('{') && analysis.education?.includes(':');
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header & Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-            <Zap className="w-5 h-5 text-indigo-400 fill-indigo-400/20" />
-          </div>
-          <div>
-            <h3 className="font-bold text-lg text-slate-100 tracking-tight">Telemetry Scan</h3>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Protocol Intelligence v2</p>
+    <div className="space-y-12 animate-in fade-in duration-1000">
+      {/* Header View */}
+      <div className="flex flex-col md:flex-row gap-8 items-start">
+        <div className={`p-8 rounded-[40px] border-4 flex flex-col items-center justify-center gap-4 transition-all duration-700 min-w-[240px] shadow-2xl ${
+          analysis.risk_level === RiskLevel.HIGH ? 'bg-rose-500/10 border-rose-500/40 shadow-rose-900/20' :
+          analysis.risk_level === RiskLevel.MEDIUM ? 'bg-amber-500/10 border-amber-500/40 shadow-amber-900/20' :
+          'bg-emerald-500/10 border-emerald-500/40 shadow-emerald-900/20'
+        }`}>
+          {getRecIcon()}
+          <div className="text-center">
+             <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 mb-1">Threat Assessment</p>
+             <p className="text-3xl font-black tracking-tighter uppercase italic">{analysis.risk_level || 'UNKNOWN'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1 mr-2">
-            <button 
-              onClick={handleSpeak}
-              disabled={isSpeaking}
-              className="p-2 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-700 transition-all text-indigo-400 disabled:opacity-50 active:scale-95"
-              title="Listen to analysis"
-            >
-              {isSpeaking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-            <button 
-              onClick={handleCopy}
-              className={`p-2 rounded-xl border transition-all active:scale-95 ${copied ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'bg-slate-800/50 border-slate-700 hover:bg-slate-700 text-slate-400'}`}
-              title="Copy analysis to clipboard"
-            >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            </button>
+
+        <div className="flex-1 space-y-6 pt-2">
+          <div className="flex flex-wrap gap-2">
+            {metadata?.scenario_tags?.map((tag, i) => (
+              <span key={i} className="px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-2">
+                <Zap className="w-3 h-3" />
+                {tag.replace('_', ' ')}
+              </span>
+            ))}
           </div>
-          {analysis.risk_level && <RiskBadge level={analysis.risk_level} />}
+          <p className="text-2xl font-bold text-slate-100 leading-snug tracking-tight">
+            "{analysis.summary}"
+          </p>
+          <div className="flex items-center gap-4">
+             <button onClick={handleSpeak} disabled={isSpeaking} className="p-3 bg-slate-800 hover:bg-slate-700 rounded-2xl transition-all disabled:opacity-50 border border-white/5">
+                {isSpeaking ? <Loader2 className="w-5 h-5 animate-spin" /> : <Volume2 className="w-5 h-5 text-indigo-400" />}
+             </button>
+             <button onClick={handleCopy} className="p-3 bg-slate-800 hover:bg-slate-700 rounded-2xl transition-all text-slate-400 border border-white/5">
+                {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
+             </button>
+          </div>
         </div>
       </div>
 
-      {/* Ethos Reputation Visualization */}
+      {/* Ethos Reputation Gauge */}
       {ethosScore !== undefined && (
-        <div className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800/60 space-y-5 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-5">
-            <Users className="w-16 h-16 text-indigo-400" />
-          </div>
-          
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">
-              <Users className="w-4 h-4 text-indigo-500" />
-              Ethos Social Reputation
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 p-8 rounded-[40px] bg-black/40 border border-white/5 space-y-6 shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Users className="w-32 h-32 text-indigo-500" />
             </div>
-            <div className={`px-3 py-1 rounded-lg bg-black/40 text-sm font-mono font-bold border border-slate-800/50 ${getEthosColor(ethosScore)}`}>
-              {ethosScore.toString().padStart(3, '0')} <span className="text-slate-600">/ 1000</span>
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+                  <Users className="w-5 h-5 text-indigo-500" />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Ethos Reputation Framework</h4>
+                  <p className="text-sm font-bold text-slate-300 italic">{getEthosTier(ethosScore)}</p>
+                </div>
+              </div>
+              <div className={`text-5xl font-black font-mono tracking-tighter glow-text ${getEthosColor(ethosScore)}`}>
+                {ethosScore}<span className="text-slate-700 text-xl ml-1">/1000</span>
+              </div>
+            </div>
+            <div className="space-y-4 relative z-10">
+              <div className="relative h-6 w-full bg-slate-950 rounded-full border border-slate-800 p-1.5 shadow-inner">
+                <div 
+                  className={`absolute top-1.5 bottom-1.5 left-1.5 rounded-full transition-all duration-[2500ms] ease-out shadow-[0_0_25px_rgba(99,102,241,0.6)] ${
+                    ethosScore > 650 ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' : 
+                    ethosScore > 350 ? 'bg-gradient-to-r from-amber-600 to-amber-400' : 
+                    'bg-gradient-to-r from-rose-600 to-rose-400'
+                  }`}
+                  style={{ width: `calc(${(ethosScore / 1000) * 100}% - 12px)` }}
+                />
+              </div>
+              <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">
+                <span>Low Social Trust</span>
+                <span>Neutral/Emerging</span>
+                <span>High Credibility</span>
+              </div>
             </div>
           </div>
-
-          <div className="relative h-4 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5 shadow-inner">
-            {/* Range markers/Segments */}
-            <div className="absolute left-[35%] top-0 bottom-0 w-0.5 bg-slate-800/80 z-20" />
-            <div className="absolute left-[65%] top-0 bottom-0 w-0.5 bg-slate-800/80 z-20" />
-            
-            <div 
-              className={`absolute top-0.5 bottom-0.5 left-0.5 rounded-full transition-all duration-[2000ms] cubic-bezier(0.16, 1, 0.3, 1) ${getEthosBg(ethosScore)}`}
-              style={{ width: `calc(${(ethosScore / 1000) * 100}% - 4px)` }}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 text-[10px] font-bold text-slate-500 uppercase tracking-tighter relative z-10 px-1">
-            <div className={`text-left transition-colors duration-500 ${ethosScore <= 350 ? 'text-rose-400' : ''}`}>Low Trust</div>
-            <div className={`text-center transition-colors duration-500 ${ethosScore > 350 && ethosScore <= 650 ? 'text-amber-400' : ''}`}>Emerging</div>
-            <div className={`text-right transition-colors duration-500 ${ethosScore > 650 ? 'text-emerald-400' : ''}`}>Verified</div>
+          <div className="p-8 rounded-[40px] bg-indigo-600/10 border border-indigo-500/20 flex flex-col justify-center items-center text-center space-y-2 group hover:bg-indigo-600/20 transition-all">
+            <TrendingUp className="w-10 h-10 text-indigo-400 mb-2 group-hover:scale-110 transition-transform" />
+            <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">Network Confidence</p>
+            <p className="text-5xl font-black text-white italic glow-text">{Math.floor((ethosScore / 1000) * 100)}%</p>
+            <p className="text-xs text-indigo-400/60 font-bold tracking-tight">Social Weight Index</p>
           </div>
         </div>
       )}
 
-      {/* Summary Section */}
-      <div className="relative p-5 bg-indigo-500/5 rounded-2xl border-l-4 border-indigo-500/40">
-        <p className="text-slate-200 text-sm leading-relaxed font-medium italic">
-          "{analysis.summary}"
-        </p>
-      </div>
-
-      {/* Tags & Details */}
-      {metadata?.scenario_tags && (
-        <div className="flex flex-wrap gap-2">
-          {metadata.scenario_tags.map((tag, i) => (
-            <span key={i} className="px-3 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-2 shadow-sm">
-              <ShieldAlert className="w-3.5 h-3.5" />
-              {tag.replace('_', ' ')}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] px-1">Technical Findings</h4>
+      {/* Narrative & Simulation */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 px-2">
+             <Search className="w-5 h-5 text-indigo-500" />
+             <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Logic Breakdown</h4>
+          </div>
           <ul className="space-y-4">
             {analysis.explanation.map((item, i) => (
-              <li key={i} className="flex items-start gap-4 text-sm text-slate-300 group/item">
-                <div className="mt-1.5 w-2 h-2 rounded-full bg-indigo-600 shrink-0 group-hover/item:scale-125 transition-all shadow-[0_0_10px_rgba(79,70,229,0.5)] border border-indigo-400/30" />
-                <span className="leading-relaxed group-hover/item:text-slate-100 transition-colors">{item}</span>
+              <li key={i} className="p-6 rounded-3xl bg-white/5 border border-white/5 flex items-start gap-4 group hover:bg-white/10 transition-all">
+                <div className={`mt-1.5 w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_10px_rgba(99,102,241,0.6)] ${item.toLowerCase().includes('conflicting') ? 'bg-rose-500 animate-pulse' : 'bg-indigo-500'}`} />
+                <span className="text-sm font-semibold text-slate-300 leading-relaxed tracking-tight group-hover:text-white">{item}</span>
               </li>
             ))}
           </ul>
         </div>
-
-        {metadata?.social_verification && (
-          <div className="space-y-4 p-6 rounded-3xl bg-[#0b0f1a] border border-slate-800 shadow-xl transition-all hover:border-indigo-500/20 group/social">
-            <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-              <Activity className="w-4 h-4 text-emerald-500" />
-              Live Pulse Sentiment
-            </h4>
-            <div className="flex items-center gap-3">
-              <div className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                metadata.social_verification.sentiment === 'suspicious' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :
-                metadata.social_verification.sentiment === 'bearish' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
-                'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-              }`}>
-                {metadata.social_verification.sentiment}
-              </div>
-              <div className="flex gap-2.5">
-                {metadata.social_verification.sources.map((src, i) => (
-                  <span key={i} title={src} className="text-slate-500 hover:text-indigo-400 transition-all cursor-help transform hover:scale-110">
-                    {src === 'Twitter' && <Twitter className="w-4 h-4" />}
-                    {src === 'Discord' && <MessageSquare className="w-4 h-4" />}
-                    {src === 'Telegram' && <Hash className="w-4 h-4" />}
-                  </span>
-                ))}
-              </div>
+        {metadata?.sandbox_simulation && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 px-2">
+               <Box className="w-5 h-5 text-rose-500" />
+               <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Attack Sandbox</h4>
             </div>
-            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-              Real-time community health score derived from Ethos Network graph analysis.
-            </p>
+            <div className="p-10 rounded-[48px] bg-rose-500/5 border border-rose-500/10 space-y-8 relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <ShieldAlert className="w-32 h-32 text-rose-500" />
+               </div>
+               <div className="space-y-2 relative z-10">
+                  <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2">Exposure Simulation</p>
+                  <p className="text-5xl font-black text-white tracking-tighter glow-text drop-shadow-lg">{metadata.sandbox_simulation.potential_loss}</p>
+               </div>
+               <div className="flex items-center gap-3 flex-wrap relative z-10">
+                  {metadata.sandbox_simulation.flow.map((step, i) => (
+                    <React.Fragment key={i}>
+                      <div className="px-5 py-2.5 bg-black/40 rounded-xl border border-white/10 text-[11px] font-black text-slate-300 uppercase tracking-widest shadow-lg">
+                        {step}
+                      </div>
+                      {i < metadata.sandbox_simulation.flow.length - 1 && <ArrowRight className="w-4 h-4 text-slate-600" />}
+                    </React.Fragment>
+                  ))}
+               </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Main Action Directive */}
-      <div className={`p-8 rounded-[32px] border-2 flex items-center gap-8 transition-all duration-500 group/rec ${getRecStyles()}`}>
-        <div className="p-4 rounded-2xl bg-slate-900/50 shadow-inner group-hover/rec:scale-110 transition-transform">
+      {/* Directive Footer */}
+      <div className={`p-10 rounded-[48px] border-4 flex flex-col md:flex-row items-center gap-8 transition-all shadow-3xl ${
+        analysis.recommendation === Recommendation.DO_NOT_PROCEED ? 'bg-rose-950/40 border-rose-500/50 shadow-rose-900/40' :
+        analysis.recommendation === Recommendation.SAFE_TO_PROCEED ? 'bg-emerald-950/40 border-emerald-500/50 shadow-emerald-900/40' :
+        'bg-amber-950/40 border-amber-500/50 shadow-amber-900/40'
+      }`}>
+        <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl">
           {getRecIcon()}
         </div>
-        <div>
-          <p className="text-[10px] uppercase font-black tracking-[0.4em] opacity-50 mb-1.5">Security Directive</p>
-          <p className="text-2xl font-black tracking-tighter uppercase italic drop-shadow-lg">{analysis.recommendation}</p>
+        <div className="flex-1 text-center md:text-left">
+          <p className="text-[10px] uppercase font-black tracking-[0.6em] text-slate-500 mb-2">Primary Protocol Directive</p>
+          <p className="text-5xl font-black italic tracking-tighter uppercase text-white glow-text">{analysis.recommendation}</p>
         </div>
+        <button onClick={handleCopy} className="px-10 py-6 bg-white/5 hover:bg-white/10 rounded-3xl text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 transition-all active:scale-95">
+          Authorize Defense Report
+        </button>
       </div>
 
-      {/* Education/Schema Guidance */}
+      {/* Educational Context */}
       {analysis.education && (
-        <div className={`p-8 rounded-[32px] border transition-all duration-500 ${isTemplate ? 'bg-slate-900/80 border-indigo-500/30' : 'bg-indigo-500/5 border-indigo-500/20 hover:bg-indigo-500/10'}`}>
-          <div className="flex items-center gap-3 mb-5 text-indigo-400">
-            {isTemplate ? <FileJson className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
-            <span className="text-[11px] font-black uppercase tracking-[0.3em]">
-              {isTemplate ? 'Telemetry Specification' : 'Mentor Security Brief'}
-            </span>
-          </div>
-          {isTemplate ? (
-            <div className="relative group/code">
-              <pre className="text-[12px] font-mono text-indigo-300 bg-black/60 p-6 rounded-2xl overflow-x-auto border border-slate-800 shadow-2xl leading-relaxed">
-                {analysis.education}
-              </pre>
-              <button 
-                onClick={() => navigator.clipboard.writeText(analysis.education!)}
-                className="absolute top-4 right-4 p-2 rounded-lg bg-slate-800 opacity-0 group-hover/code:opacity-100 transition-all hover:bg-slate-700 text-slate-400"
-              >
-                <Copy className="w-4 h-4" />
-              </button>
+        <div className="p-10 rounded-[48px] bg-indigo-500/5 border border-indigo-500/10 space-y-6 group hover:border-indigo-500/30 transition-all">
+          <div className="flex items-center gap-4 text-indigo-400">
+            <div className="p-3 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+              <BookOpen className="w-5 h-5" />
             </div>
-          ) : (
-            <p className="text-sm text-slate-300 leading-relaxed font-medium">
-              {analysis.education}
-            </p>
-          )}
+            <span className="text-[11px] font-black uppercase tracking-[0.4em]">Defense Knowledge Retrieval</span>
+          </div>
+          <p className="text-xl text-slate-400 font-medium leading-relaxed italic border-l-4 border-indigo-500/20 pl-8">
+            "{analysis.education}"
+          </p>
         </div>
       )}
     </div>

@@ -10,37 +10,29 @@ Your persona is a calm, MIT-style blockchain mentor. Your job is to translate te
 
 ETHOS REPUTATION FRAMEWORK:
 - Scores < 350: Low Trust (High anonymity or negative social attestations).
-- Scores 351-650: Neutral (Developing reputation).
+- Scores 351-650: Neutral/Emerging (Developing reputation).
 - Scores > 650: High Credibility (Socially vouched by trusted peers).
 
-MULTI-CHANNEL SOCIAL SIGNALS:
-You MUST integrate and simulate real-time social signals:
-- Twitter/X: Mentions of scams, hacks, or rugs.
-- Discord/Telegram: Community sentiment trends.
-- Cross-reference with Ethos score for Social Verification.
-
-ERROR HANDLING & MALFORMED INPUT:
-If the user provides input that is NOT a valid transaction JSON or is missing key fields (transaction_type, asset, ethos_score, risk_score, flags):
-1. Set risk_level to null.
-2. Provide a summary explaining the missing data.
-3. In 'education', provide a clear JSON template of the expected format.
-4. Set 'tts_text' to: "I cannot analyze this. Please provide a valid transaction JSON including asset and risk scores."
-
-CORE LOGIC:
+CORE SECURITY LOGIC:
 1. Map risk_score → risk_level: 0-30=LOW, 31-60=MEDIUM, 61-100=HIGH.
-2. TTS (tts_text) MUST be extremely concise and actionable.
+2. CONFLICT CHECK: If risk_level is LOW but flags include 'known_scam_contract', 'rugpull_indicators', or 'honeypot_risk', you MUST flag "Conflicting Signals" in the explanation.
+3. SANDBOX SIMULATION: Calculate potential loss (e.g., "Entire balance of [Asset]" for unlimited approvals).
 
 REQUIRED OUTPUT FORMAT (JSON):
 {
   "risk_level": "LOW | MEDIUM | HIGH | null",
   "summary": "Concise overview.",
-  "explanation": ["Detail 1", "Detail 2"],
+  "explanation": ["Bullet points explaining technical and social markers."],
   "recommendation": "DO NOT PROCEED | SAFE TO PROCEED | CAUTION",
-  "education": "Guidance or template for correct input.",
-  "tts_text": "Direct audio instruction.",
+  "education": "Context on specific scam mechanics (e.g. honeypots, approvals).",
+  "tts_text": "EXTREMELY CONCISE direct audio instruction.",
   "enhanced_metadata": {
-    "scenario_tags": ["tag1", "tag2"],
-    "social_verification": { "sentiment": "string", "sources": ["string"] }
+    "scenario_tags": ["scam", "approval", "reputation_low", etc],
+    "social_verification": { "sentiment": "suspicious|neutral|positive", "sources": ["Twitter", "Discord"] },
+    "sandbox_simulation": {
+      "potential_loss": "String description of what is at stake",
+      "flow": ["Step 1", "Step 2"]
+    }
   }
 }
 `;
@@ -72,6 +64,13 @@ export const analyzeTransaction = async (input: any): Promise<RiskAnalysisRespon
                     sentiment: { type: Type.STRING },
                     sources: { type: Type.ARRAY, items: { type: Type.STRING } }
                   }
+                },
+                sandbox_simulation: {
+                  type: Type.OBJECT,
+                  properties: {
+                    potential_loss: { type: Type.STRING },
+                    flow: { type: Type.ARRAY, items: { type: Type.STRING } }
+                  }
                 }
               }
             }
@@ -85,7 +84,6 @@ export const analyzeTransaction = async (input: any): Promise<RiskAnalysisRespon
     return result as RiskAnalysisResponse;
   } catch (error) {
     console.error("EthosShield Analysis Error:", error);
-    // Fallback for extreme parsing errors
     return {
       risk_level: null as any,
       summary: "Protocol Error: Unable to parse telemetry.",

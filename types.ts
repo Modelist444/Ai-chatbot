@@ -31,6 +31,10 @@ export interface EnhancedMetadata {
     sentiment: string;
     sources: string[];
   };
+  sandbox_simulation?: {
+    potential_loss: string;
+    flow: string[];
+  };
 }
 
 export interface RiskAnalysisResponse {
