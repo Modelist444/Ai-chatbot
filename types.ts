@@ -25,12 +25,22 @@ export interface TransactionInput {
   flags: string[];
 }
 
+export interface EnhancedMetadata {
+  scenario_tags?: string[];
+  social_verification?: {
+    sentiment: string;
+    sources: string[];
+  };
+}
+
 export interface RiskAnalysisResponse {
   risk_level: RiskLevel;
   summary: string;
   explanation: string[];
   recommendation: Recommendation;
   education?: string;
+  tts_text: string;
+  enhanced_metadata?: EnhancedMetadata;
 }
 
 export interface Message {

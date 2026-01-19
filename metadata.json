@@ -1,5 +1,5 @@
 {
-  "name": "Safe Send AI",
+  "name": "EthosShield",
   "description": "A Web3 Risk Explanation Chatbot that interprets blockchain transaction scans into human-readable, actionable security guidance.",
   "requestFramePermissions": [
     "microphone"
