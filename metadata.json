@@ -1,5 +1,7 @@
 {
   "name": "Safe Send AI",
   "description": "A Web3 Risk Explanation Chatbot that interprets blockchain transaction scans into human-readable, actionable security guidance.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

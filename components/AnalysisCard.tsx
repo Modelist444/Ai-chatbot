@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { RiskAnalysisResponse, Recommendation, RiskLevel } from '../types';
 import { RiskBadge } from './RiskBadge';
-import { AlertTriangle, ShieldCheck, Info, BookOpen, Volume2, Loader2 } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, Info, BookOpen, Volume2, Loader2, Copy, Check } from 'lucide-react';
 import { generateSpeech } from '../geminiService';
 import { playPCM } from '../audioUtils';
 
@@ -12,6 +12,7 @@ interface AnalysisCardProps {
 
 export const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleSpeak = async () => {
     if (isSpeaking) return;
@@ -27,6 +28,28 @@ export const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis }) => {
     } finally {
       setIsSpeaking(false);
     }
+  };
+
+  const handleCopy = () => {
+    const reportText = `
+🛡️ **Safe Send AI - Risk Analysis Report**
+------------------------------------------
+🚩 **Risk Level:** ${analysis.risk_level}
+📝 **Summary:** ${analysis.summary}
+
+🔍 **Key Findings:**
+${analysis.explanation.map(exp => `• ${exp}`).join('\n')}
+
+💡 **Recommendation:** ${analysis.recommendation}
+${analysis.education ? `\n📚 **Context:** ${analysis.education}` : ''}
+------------------------------------------
+Verified by Safe Send AI
+    `.trim();
+
+    navigator.clipboard.writeText(reportText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   const getRecIcon = () => {
@@ -48,16 +71,25 @@ export const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis }) => {
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <h3 className="font-semibold text-lg text-slate-100">Transaction Analysis</h3>
-          <button 
-            onClick={handleSpeak}
-            disabled={isSpeaking}
-            className="p-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors text-indigo-400 disabled:opacity-50"
-            title="Listen to analysis"
-          >
-            {isSpeaking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
-          </button>
+          <div className="flex gap-1">
+            <button 
+              onClick={handleSpeak}
+              disabled={isSpeaking}
+              className="p-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors text-indigo-400 disabled:opacity-50"
+              title="Listen to analysis"
+            >
+              {isSpeaking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+            <button 
+              onClick={handleCopy}
+              className={`p-1.5 rounded-lg border transition-all ${copied ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-400'}`}
+              title="Copy analysis to clipboard"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
         <RiskBadge level={analysis.risk_level} />
       </div>

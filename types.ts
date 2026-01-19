@@ -11,6 +11,12 @@ export enum Recommendation {
   CAUTION = 'CAUTION'
 }
 
+export enum Modality {
+  AUDIO = 'AUDIO',
+  TEXT = 'TEXT',
+  IMAGE = 'IMAGE'
+}
+
 export interface TransactionInput {
   transaction_type: string;
   asset: string;
