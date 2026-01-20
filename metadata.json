@@ -1,6 +1,6 @@
 {
   "name": "EthosShield",
-  "description": "Cyber-defense grade Web3 risk explanation platform powered by Ethos Network reputation data.",
+  "description": "Tactical Web3 security protection powered by Ethos Network reputation data.",
   "requestFramePermissions": [
     "microphone"
   ]

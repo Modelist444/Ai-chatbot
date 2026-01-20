@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { RiskAnalysisResponse, Recommendation, RiskLevel } from '../types';
 import { AlertTriangle, ShieldCheck, Info, BookOpen, Volume2, Loader2, Copy, Check, Users, ShieldAlert, Zap, Box, ArrowRight, TrendingUp, Search } from 'lucide-react';
@@ -28,7 +27,7 @@ export const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis, ethosScore
   };
 
   const handleCopy = () => {
-    const reportText = `[ETHOS SHIELD REPORT]\nSTATUS: ${analysis.risk_level}\nRECOMMENDATION: ${analysis.recommendation}\nETHOS SCORE: ${ethosScore || 'N/A'}\n${analysis.summary}`;
+    const reportText = `[ETHOSSHIELD INTEL REPORT]\nSTATUS: ${analysis.risk_level}\nRECOMMENDATION: ${analysis.recommendation}\nETHOS SCORE: ${ethosScore || 'N/A'}\n${analysis.summary}`;
     navigator.clipboard.writeText(reportText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -199,11 +198,11 @@ export const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis, ethosScore
           {getRecIcon()}
         </div>
         <div className="flex-1 text-center md:text-left">
-          <p className="text-[10px] uppercase font-black tracking-[0.6em] text-slate-500 mb-2">Primary Protocol Directive</p>
+          <p className="text-[10px] uppercase font-black tracking-[0.6em] text-slate-500 mb-2">Primary Defense Protocol</p>
           <p className="text-5xl font-black italic tracking-tighter uppercase text-white glow-text">{analysis.recommendation}</p>
         </div>
         <button onClick={handleCopy} className="px-10 py-6 bg-white/5 hover:bg-white/10 rounded-3xl text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 transition-all active:scale-95">
-          Authorize Defense Report
+          Generate Secure Intel Report
         </button>
       </div>
 
@@ -214,7 +213,7 @@ export const AnalysisCard: React.FC<AnalysisCardProps> = ({ analysis, ethosScore
             <div className="p-3 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
               <BookOpen className="w-5 h-5" />
             </div>
-            <span className="text-[11px] font-black uppercase tracking-[0.4em]">Defense Knowledge Retrieval</span>
+            <span className="text-[11px] font-black uppercase tracking-[0.4em]">Strategic Knowledge Retrieval</span>
           </div>
           <p className="text-xl text-slate-400 font-medium leading-relaxed italic border-l-4 border-indigo-500/20 pl-8">
             "{analysis.education}"

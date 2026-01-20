@@ -30,7 +30,7 @@ const App: React.FC = () => {
     const interval = setInterval(() => {
       const log = [
         `[NET] Received Attestation 0x${Math.random().toString(16).slice(2, 10)}`,
-        `[SCAN] Analyzing Contract Memory...`,
+        `[SCAN] EthosShield analyzing Contract Memory...`,
         `[ETHOS] Score Updated: +${(Math.random()*2).toFixed(1)} Social Weight`,
         `[THREAT] Monitor Active: ${Math.floor(Math.random()*500)} req/s`
       ][Math.floor(Math.random()*4)];
@@ -106,7 +106,7 @@ const App: React.FC = () => {
         },
         config: {
           responseModalities: ['AUDIO' as any],
-          systemInstruction: `You are EthosShield, a tactical AI security operative. Your tone is sharp and professional. Context: ${inputJson}`,
+          systemInstruction: `Your name is EthosShield. If asked who you are, say "I am EthosShield". You are a tactical security agent. Tone is professional and sharp. Context: ${inputJson}`,
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
         }
       });
@@ -133,7 +133,7 @@ const App: React.FC = () => {
       const audio = await generateSpeech(analysis.tts_text);
       if (audio) await playPCM(audio);
     } catch (e) {
-      setMessages(prev => [...prev, { id: 'err', role: 'assistant', content: "CRITICAL PARSE ERROR: Telemetry malformed.", timestamp: Date.now() }]);
+      setMessages(prev => [...prev, { id: 'err', role: 'assistant', content: "CRITICAL ERROR: Telemetry malformed.", timestamp: Date.now() }]);
     } finally {
       setIsLoading(false);
     }
@@ -146,8 +146,8 @@ const App: React.FC = () => {
           <div className="flex items-center gap-4">
             <Shield className="w-8 h-8 text-indigo-400" />
             <div>
-              <h1 className="text-2xl font-black tracking-tighter uppercase italic glow-text">EthosShield</h1>
-              <p className="text-[10px] text-indigo-400 font-bold tracking-[0.3em] uppercase opacity-70">Defense Intelligence</p>
+              <h1 className="text-xl font-black tracking-tighter uppercase italic glow-text">EthosShield</h1>
+              <p className="text-[9px] text-indigo-400 font-bold tracking-[0.3em] uppercase opacity-70">Defense Intelligence AI</p>
             </div>
           </div>
           <Radar className="w-5 h-5 text-indigo-500/50 animate-spin-slow" />
@@ -161,24 +161,24 @@ const App: React.FC = () => {
             }`}
           >
             {isLiveActive ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-            {isLiveActive ? "Abort Connection" : "Voice War Room"}
+            {isLiveActive ? "Abort Secure Line" : "Connect Tactical Voice"}
           </button>
 
           <div className="space-y-4">
             <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-3 px-1">
-              <Terminal className="w-4 h-4 text-indigo-500" /> Raw Telemetry Data
+              <Terminal className="w-4 h-4 text-indigo-500" /> Scanner Telemetry
             </label>
             <textarea
               value={inputJson}
               onChange={(e) => setInputJson(e.target.value)}
-              className="w-full h-80 bg-black/40 border border-slate-800 rounded-2xl p-6 text-indigo-300 mono text-[13px] outline-none shadow-2xl"
+              className="w-full h-80 bg-black/40 border border-slate-800 rounded-2xl p-6 text-indigo-100 mono text-[13px] outline-none shadow-2xl"
               spellCheck={false}
             />
           </div>
 
           <div className="space-y-4">
             <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-3">
-              <Activity className="w-4 h-4 text-indigo-400" /> Sub-Network Feed
+              <Activity className="w-4 h-4 text-indigo-400" /> Tactical Intelligence Feed
             </h4>
             <div className="bg-black/40 border border-slate-800 rounded-2xl p-4 h-40 overflow-hidden relative">
               <div className="space-y-1">
@@ -196,8 +196,8 @@ const App: React.FC = () => {
             disabled={isLoading || isLiveActive}
             className="w-full h-16 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-4 border border-indigo-400/30 uppercase text-xs tracking-[0.3em] shadow-indigo-900/40"
           >
-            {isLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Radar className="w-5 h-5" />}
-            Execute Clearance
+            {isLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Shield className="w-5 h-5" />}
+            Execute Analysis
           </button>
         </div>
       </aside>
@@ -207,7 +207,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-6">
             <div className={`w-3 h-3 rounded-full ${isLiveActive ? 'bg-rose-500 animate-ping shadow-[0_0_12px_#f43f5e]' : 'bg-indigo-500 shadow-[0_0_12px_#6366f1]'}`} />
             <span className="text-[10px] font-black tracking-[0.4em] text-slate-400 uppercase">
-              {isLiveActive ? 'Secured Voice Channel 402' : 'Threat Intelligence Core'}
+              {isLiveActive ? 'Secured Comms Active' : 'Intelligence Monitoring'}
             </span>
           </div>
           <button onClick={() => setMessages([])} className="p-3 text-slate-600 hover:text-rose-400 transition-all">
@@ -224,17 +224,17 @@ const App: React.FC = () => {
                     <div key={i} className="w-2 bg-indigo-400/80 rounded-full animate-waveform" style={{ height: `${20 + Math.random() * 80}%`, animationDelay: `${i * 0.04}s` }} />
                   ))}
                 </div>
-                <p className="text-4xl font-black text-slate-100 min-h-[5rem] tracking-tight">{liveTranscription.user || "Awaiting Voice Command..."}</p>
+                <p className="text-4xl font-black text-slate-100 min-h-[5rem] tracking-tight">{liveTranscription.user || "Awaiting Voice Input..."}</p>
                 {liveTranscription.ai && <div className="p-10 bg-indigo-500/5 border border-indigo-500/20 rounded-[40px]"><p className="text-2xl text-indigo-100 font-semibold">{liveTranscription.ai}</p></div>}
-                <button onClick={stopLiveSession} className="bg-rose-500 text-white px-12 py-5 rounded-2xl font-black flex items-center gap-4 mx-auto uppercase text-xs tracking-[0.3em]"><X className="w-5 h-5" /> Termination</button>
+                <button onClick={stopLiveSession} className="bg-rose-500 text-white px-12 py-5 rounded-2xl font-black flex items-center gap-4 mx-auto uppercase text-xs tracking-[0.3em]"><X className="w-5 h-5" /> Terminate Session</button>
               </div>
             </div>
           )}
 
           {messages.length === 0 && !isLiveActive && (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto space-y-10 opacity-50">
-              <Radar className="w-16 h-16 text-indigo-500/20" />
-              <h3 className="text-3xl font-black uppercase italic">Protocol Standby</h3>
+              <Shield className="w-16 h-16 text-indigo-500/20" />
+              <h3 className="text-3xl font-black uppercase italic tracking-tighter">EthosShield AI</h3>
             </div>
           )}
 
